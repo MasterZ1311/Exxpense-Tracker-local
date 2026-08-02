@@ -1,0 +1,27 @@
+{
+  "name": "expense-tracker",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^8.2.0",
+    "workbox-cli": "^7.4.1"
+  },
+  "dependencies": {
+    "@mlc-ai/web-llm": "^0.2.84",
+    "chart.js": "^4.5.1",
+    "html2canvas": "^1.4.1",
+    "idb": "^8.0.3",
+    "jspdf": "^4.2.1",
+    "lucide": "^1.28.0",
+    "papaparse": "^5.5.4",
+    "pdf-parse": "^2.4.5",
+    "tesseract.js": "^7.0.0",
+    "xlsx": "^0.18.5"
+  }
+}

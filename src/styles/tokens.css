@@ -1,0 +1,55 @@
+:root {
+  /* Rich, deep backgrounds */
+  --bg-base: #030712;
+  --bg-surface: rgba(17, 24, 39, 0.4);
+  --bg-surface-hover: rgba(31, 41, 55, 0.5);
+  --bg-sidebar: rgba(3, 7, 18, 0.85);
+
+  /* Vibrant Accents */
+  --accent-primary: #818cf8;
+  --accent-secondary: #c084fc;
+  --accent-tertiary: #2dd4bf;
+  --accent-success: #10b981;
+  --accent-warning: #f59e0b;
+  --accent-danger: #f43f5e;
+
+  /* Typography Colors */
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #475569;
+
+  /* Borders & Effects */
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-light: rgba(255, 255, 255, 0.15);
+  --border-accent: rgba(129, 140, 248, 0.4);
+  
+  --glass-blur: blur(24px);
+  --glass-border: 1px solid rgba(255, 255, 255, 0.1);
+  --glass-border-inner: inset 0 1px 1px rgba(255, 255, 255, 0.15);
+  
+  --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.6);
+  --shadow-glow: 0 0 30px rgba(129, 140, 248, 0.2);
+
+  /* Border Radii */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --radius-round: 9999px;
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 40px;
+  --space-9: 48px;
+
+  /* Typography Options */
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+

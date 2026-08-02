@@ -1,368 +1,171 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Advanced Expense Tracker (Basic UI)</title>
-    <!-- Libraries -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="FinTrack Pro — Professional expense tracking, budgeting, and financial analytics" />
+  <meta name="theme-color" content="#0a0f1e" />
 
-    <style>
-        body { font-family: sans-serif; margin: 20px; max-width: 900px; margin: auto; }
-        .section { border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; }
-        .flex { display: flex; gap: 10px; flex-wrap: wrap; }
-        .summary-box { border: 1px solid #aaa; padding: 10px; flex: 1; text-align: center; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
-        .income-text { color: green; font-weight: bold; }
-        .expense-text { color: red; font-weight: bold; }
-        .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .canvas-container { height: 250px; }
-        .alert { background: #ffe6e6; border: 1px solid red; padding: 10px; color: red; margin-bottom: 10px; }
-    </style>
+  <title>FinTrack Pro — Expense Tracker</title>
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="/manifest.json" />
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ── Reset & Global ─────────────────────────────────────── */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      /* Core palette */
+      --bg-primary:    #0a0f1e;
+      --bg-secondary:  #111827;
+      --bg-card:       #1a1f35;
+      --bg-elevated:   #232a42;
+      --border:        rgba(255, 255, 255, 0.06);
+      --border-active: rgba(99, 102, 241, 0.5);
+
+      /* Text */
+      --text-primary:   #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted:     #64748b;
+
+      /* Accent */
+      --accent:         #6366f1;
+      --accent-light:   #818cf8;
+      --accent-glow:    rgba(99, 102, 241, 0.25);
+
+      /* Status */
+      --success:  #22c55e;
+      --warning:  #f59e0b;
+      --danger:   #ef4444;
+      --info:     #3b82f6;
+
+      /* Spacing */
+      --sidebar-w: 260px;
+      --topbar-h:  64px;
+      --radius:    12px;
+      --radius-sm: 8px;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* ── App Layout ─────────────────────────────────────────── */
+    #app-wrapper {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Sidebar */
+    #sidebar {
+      width: var(--sidebar-w);
+      min-width: var(--sidebar-w);
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 100;
+    }
+
+    /* Main area */
+    #main-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-width: 0;
+    }
+
+    /* Topbar */
+    #topbar {
+      height: var(--topbar-h);
+      min-height: var(--topbar-h);
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      gap: 16px;
+    }
+
+    /* Content area */
+    #app-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+      scroll-behavior: smooth;
+    }
+
+    /* Scrollbar styling */
+    #app-content::-webkit-scrollbar { width: 6px; }
+    #app-content::-webkit-scrollbar-track { background: transparent; }
+    #app-content::-webkit-scrollbar-thumb {
+      background: var(--bg-elevated);
+      border-radius: 3px;
+    }
+    #app-content::-webkit-scrollbar-thumb:hover {
+      background: var(--text-muted);
+    }
+
+    /* ── Loading State ──────────────────────────────────────── */
+    .app-loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      opacity: 0.5;
+    }
+
+    .app-loading .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ── Responsive ─────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      #sidebar {
+        position: fixed;
+        left: 0; top: 0; bottom: 0;
+        transform: translateX(-100%);
+      }
+      #sidebar.open { transform: translateX(0); }
+    }
+  </style>
 </head>
 <body>
-    <h1>Smart Expense Tracker (Advanced Features)</h1>
-
-    <!-- 1. Summary Section -->
-    <div class="section flex">
-        <div class="summary-box">
-            <h3>Balance</h3>
-            <p id="total-balance">$0.00</p>
+  <div id="app-wrapper">
+    <aside id="sidebar"><!-- filled by sidebar module --></aside>
+    <div id="main-area">
+      <header id="topbar"><!-- filled by topbar module --></header>
+      <main id="app-content">
+        <div class="app-loading">
+          <div class="spinner"></div>
         </div>
-        <div class="summary-box">
-            <h3>Income</h3>
-            <p id="total-income" class="income-text">$0.00</p>
-        </div>
-        <div class="summary-box">
-            <h3>Expenses</h3>
-            <p id="total-expense" class="expense-text">$0.00</p>
-        </div>
+      </main>
     </div>
+  </div>
 
-    <!-- Budget Alerts Area -->
-    <div id="alerts-container"></div>
-
-    <!-- 2. Charts Section -->
-    <div class="section chart-grid">
-        <div class="canvas-container">
-            <h4 style="text-align: center;">Expenses by Category</h4>
-            <canvas id="pieChart"></canvas>
-        </div>
-        <div class="canvas-container">
-            <h4 style="text-align: center;">Income vs Expense</h4>
-            <canvas id="barChart"></canvas>
-        </div>
-    </div>
-
-    <!-- 3. Add Transaction Section -->
-    <div class="section">
-        <h3>Add Transaction</h3>
-        <form id="transaction-form" class="flex">
-            <input type="text" id="desc" placeholder="Description" required>
-            <input type="number" id="amt" placeholder="Amount" step="0.01" required>
-            <input type="date" id="date" required>
-            <select id="cat">
-                <option value="Food">Food</option>
-                <option value="Travel">Travel</option>
-                <option value="Shopping">Shopping</option>
-                <option value="Bills">Bills</option>
-                <option value="Salary">Salary</option>
-                <option value="Other">Other</option>
-            </select>
-            <select id="type">
-                <option value="expense">Expense</option>
-                <option value="income">Income</option>
-            </select>
-            <button type="submit">Save</button>
-        </form>
-    </div>
-
-    <!-- 4. Budget Settings Section -->
-    <div class="section">
-        <h3>Category Budgets</h3>
-        <div class="flex">
-            <select id="budget-cat">
-                <option value="Food">Food</option>
-                <option value="Travel">Travel</option>
-                <option value="Shopping">Shopping</option>
-                <option value="Bills">Bills</option>
-                <option value="Other">Other</option>
-            </select>
-            <input type="number" id="budget-limit" placeholder="Limit ($)">
-            <button onclick="saveCategoryBudget()">Set Budget</button>
-        </div>
-        <div id="budget-list" style="margin-top: 10px; font-size: 0.9em; color: #555;"></div>
-    </div>
-
-    <!-- 5. Search, Filter & Sort Section -->
-    <div class="section">
-        <h3>Filter & Sort Transactions</h3>
-        <div class="flex">
-            <input type="text" id="search" placeholder="Search description..." oninput="updateUI()">
-            <select id="filter-cat" onchange="updateUI()">
-                <option value="All">All Categories</option>
-                <option value="Food">Food</option>
-                <option value="Travel">Travel</option>
-                <option value="Shopping">Shopping</option>
-                <option value="Bills">Bills</option>
-                <option value="Salary">Salary</option>
-                <option value="Other">Other</option>
-            </select>
-            <select id="sort-by" onchange="updateUI()">
-                <option value="date-desc">Newest First</option>
-                <option value="date-asc">Oldest First</option>
-                <option value="amt-desc">Highest Amount</option>
-                <option value="amt-asc">Lowest Amount</option>
-            </select>
-        </div>
-
-        <table>
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Description</th>
-                    <th>Category</th>
-                    <th>Amount</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody id="transaction-table"></tbody>
-        </table>
-    </div>
-
-    <!-- 6. Data Management Section -->
-    <div class="section flex">
-        <button onclick="exportPDF()">Export PDF</button>
-        <button onclick="exportExcel()">Export Excel</button>
-        <button onclick="exportJSON()">Backup Data (JSON)</button>
-        <input type="file" id="import-json" style="display:none" onchange="importJSON(event)">
-        <button onclick="document.getElementById('import-json').click()">Restore Backup</button>
-        <button onclick="clearData()" style="color: red;">Clear All Data</button>
-    </div>
-
-    <script>
-        // --- DATA STATE ---
-        let transactions = JSON.parse(localStorage.getItem('adv_transactions')) || [];
-        let categoryBudgets = JSON.parse(localStorage.getItem('adv_budgets')) || {};
-        let pieChart = null;
-        let barChart = null;
-
-        // --- CORE FUNCTIONS ---
-
-        function updateUI() {
-            const searchTerm = document.getElementById('search').value.toLowerCase();
-            const filterCat = document.getElementById('filter-cat').value;
-            const sortBy = document.getElementById('sort-by').value;
-
-            // 1. Filter Data
-            let filtered = transactions.filter(t => {
-                const matchSearch = t.desc.toLowerCase().includes(searchTerm);
-                const matchCat = filterCat === "All" || t.cat === filterCat;
-                return matchSearch && matchCat;
-            });
-
-            // 2. Sort Data
-            filtered.sort((a, b) => {
-                if (sortBy === 'date-desc') return new Date(b.date) - new Date(a.date);
-                if (sortBy === 'date-asc') return new Date(a.date) - new Date(b.date);
-                if (sortBy === 'amt-desc') return b.amt - a.amt;
-                if (sortBy === 'amt-asc') return a.amt - b.amt;
-            });
-
-            // 3. Render Table
-            const tableBody = document.getElementById('transaction-table');
-            tableBody.innerHTML = "";
-            let totalInc = 0, totalExp = 0;
-
-            // Calculate totals and render rows
-            filtered.forEach((t, i) => {
-                const row = `<tr>
-                    <td>${t.date}</td>
-                    <td>${t.desc}</td>
-                    <td>${t.cat}</td>
-                    <td class="${t.type === 'income' ? 'income-text' : 'expense-text'}">
-                        ${t.type === 'income' ? '+' : '-'}$${t.amt.toFixed(2)}
-                    </td>
-                    <td><button onclick="deleteTransaction('${t.id}')">Delete</button></td>
-                </tr>`;
-                tableBody.innerHTML += row;
-            });
-
-            // Re-calculate global totals from ALL transactions (not just filtered)
-            transactions.forEach(t => {
-                if (t.type === 'income') totalInc += parseFloat(t.amt);
-                else totalExp += parseFloat(t.amt);
-            });
-
-            document.getElementById('total-balance').innerText = `$${(totalInc - totalExp).toFixed(2)}`;
-            document.getElementById('total-income').innerText = `$${totalInc.toFixed(2)}`;
-            document.getElementById('total-expense').innerText = `$${totalExp.toFixed(2)}`;
-
-            checkBudgets(totalExp);
-            renderCharts();
-            renderBudgetList();
-            localStorage.setItem('adv_transactions', JSON.stringify(transactions));
-        }
-
-        // --- TRANSACTION ACTIONS ---
-
-        document.getElementById('transaction-form').onsubmit = (e) => {
-            e.preventDefault();
-            const newTx = {
-                id: Date.now().toString(),
-                desc: document.getElementById('desc').value,
-                amt: parseFloat(document.getElementById('amt').value),
-                date: document.getElementById('date').value,
-                cat: document.getElementById('cat').value,
-                type: document.getElementById('type').value
-            };
-            transactions.push(newTx);
-            updateUI();
-            e.target.reset();
-        };
-
-        function deleteTransaction(id) {
-            if (confirm("Delete?")) {
-                transactions = transactions.filter(t => t.id !== id);
-                updateUI();
-            }
-        }
-
-        // --- BUDGET ACTIONS ---
-
-        function saveCategoryBudget() {
-            const cat = document.getElementById('budget-cat').value;
-            const limit = parseFloat(document.getElementById('budget-limit').value);
-            if (limit > 0) {
-                categoryBudgets[cat] = limit;
-                localStorage.setItem('adv_budgets', JSON.stringify(categoryBudgets));
-                updateUI();
-            }
-        }
-
-        function checkBudgets() {
-            const alerts = document.getElementById('alerts-container');
-            alerts.innerHTML = "";
-            
-            // Calculate current spend per category
-            const catSpend = {};
-            transactions.forEach(t => {
-                if (t.type === 'expense') {
-                    catSpend[t.cat] = (catSpend[t.cat] || 0) + t.amt;
-                }
-            });
-
-            // Check against limits
-            for (const cat in categoryBudgets) {
-                const spent = catSpend[cat] || 0;
-                const limit = categoryBudgets[cat];
-                if (spent > limit) {
-                    alerts.innerHTML += `<div class="alert">⚠️ Budget exceeded for ${cat}! (Spent: $${spent.toFixed(2)} / Limit: $${limit.toFixed(2)})</div>`;
-                }
-            }
-        }
-
-        function renderBudgetList() {
-            const list = document.getElementById('budget-list');
-            list.innerHTML = "<strong>Current Limits:</strong> " + 
-                Object.entries(categoryBudgets).map(([c, l]) => `${c}: $${l}`).join(" | ");
-        }
-
-        // --- CHART ACTIONS ---
-
-        function renderCharts() {
-            const pieCtx = document.getElementById('pieChart').getContext('2d');
-            const barCtx = document.getElementById('barChart').getContext('2d');
-
-            // 1. Data for Pie (Expenses by Category)
-            const catTotals = {};
-            transactions.filter(t => t.type === 'expense').forEach(t => {
-                catTotals[t.cat] = (catTotals[t.cat] || 0) + t.amt;
-            });
-
-            if (pieChart) pieChart.destroy();
-            pieChart = new Chart(pieCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: Object.keys(catTotals),
-                    datasets: [{
-                        data: Object.values(catTotals),
-                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#C9CBCF']
-                    }]
-                }
-            });
-
-            // 2. Data for Bar (Income vs Expense)
-            let inc = 0, exp = 0;
-            transactions.forEach(t => { t.type === 'income' ? inc += t.amt : exp += t.amt; });
-
-            if (barChart) barChart.destroy();
-            barChart = new Chart(barCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['Income', 'Expense'],
-                    datasets: [{
-                        label: 'Amount ($)',
-                        data: [inc, exp],
-                        backgroundColor: ['green', 'red']
-                    }]
-                },
-                options: { scales: { y: { beginAtZero: true } } }
-            });
-        }
-
-        // --- EXPORT / IMPORT ACTIONS ---
-
-        function exportPDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            doc.text("Financial Statement", 10, 10);
-            transactions.forEach((t, i) => doc.text(`${t.date} | ${t.desc} | ${t.type === 'income' ? '+' : '-'}$${t.amt}`, 10, 20 + (i * 10)));
-            doc.save("report.pdf");
-        }
-
-        function exportExcel() {
-            const ws = XLSX.utils.json_to_sheet(transactions);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Data");
-            XLSX.writeFile(wb, "data.xlsx");
-        }
-
-        function exportJSON() {
-            const data = JSON.stringify({ transactions, categoryBudgets });
-            const blob = new Blob([data], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'backup.json';
-            a.click();
-        }
-
-        function importJSON(event) {
-            const file = event.target.files[0];
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const data = JSON.parse(e.target.result);
-                transactions = data.transactions || [];
-                categoryBudgets = data.categoryBudgets || {};
-                updateUI();
-            };
-            reader.readAsText(file);
-        }
-
-        function clearData() {
-            if (confirm("Wipe everything?")) {
-                transactions = [];
-                categoryBudgets = {};
-                updateUI();
-            }
-        }
-
-        // Initialize today's date
-        document.getElementById('date').valueAsDate = new Date();
-        updateUI();
-    </script>
+  <script type="module" src="/src/main.js"></script>
 </body>
 </html>

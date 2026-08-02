@@ -1,0 +1,30 @@
+/** FinTrack Pro — HDFC Bank Profile */
+export default {
+  id: 'hdfc',
+  name: 'HDFC Bank',
+  country: 'IN',
+  currency: 'INR',
+  signatures: ['HDFC Bank', 'HDFCBANK'],
+  skipRows: 21,
+  headerRowKeyword: 'Date',
+  columns: {
+    date: 'Date',
+    valueDate: 'Value Dt',
+    description: 'Narration',
+    reference: 'Chq./Ref.No.',
+    debit: 'Withdrawal Amt.',
+    credit: 'Deposit Amt.',
+    balance: 'Closing Balance',
+  },
+  dateFormat: 'DD/MM/YY',
+  amountStyle: 'separate',
+  numberFormat: 'indian',
+  pdf: {
+    tableStartKeyword: 'Date',
+    dateColumnX: [0, 80],
+    descriptionColumnX: [80, 400],
+    debitColumnX: [400, 480],
+    creditColumnX: [480, 560],
+    balanceColumnX: [560, 650],
+  },
+};

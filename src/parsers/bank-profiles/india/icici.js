@@ -1,0 +1,30 @@
+/** FinTrack Pro — ICICI Bank Profile */
+export default {
+  id: 'icici',
+  name: 'ICICI Bank',
+  country: 'IN',
+  currency: 'INR',
+  signatures: ['ICICI Bank', 'ICICI'],
+  skipRows: 0,
+  headerRowKeyword: 'Transaction Date',
+  columns: {
+    date: 'Transaction Date',
+    valueDate: 'Value Date',
+    description: 'Description',
+    reference: 'Ref No',
+    debit: 'Debit',
+    credit: 'Credit',
+    balance: 'Balance',
+  },
+  dateFormat: 'DD-MM-YYYY',
+  amountStyle: 'separate',
+  numberFormat: 'indian',
+  pdf: {
+    tableStartKeyword: 'Transaction Date',
+    dateColumnX: [0, 90],
+    descriptionColumnX: [90, 370],
+    debitColumnX: [370, 460],
+    creditColumnX: [460, 550],
+    balanceColumnX: [550, 650],
+  },
+};

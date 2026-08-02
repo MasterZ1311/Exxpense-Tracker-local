@@ -1,0 +1,27 @@
+[data-theme="light"] {
+  --bg-base: #f8fafc;
+  --bg-surface: rgba(255, 255, 255, 0.7);
+  --bg-surface-hover: rgba(255, 255, 255, 0.9);
+  --bg-sidebar: rgba(248, 250, 252, 0.95);
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --border-subtle: rgba(0, 0, 0, 0.08);
+  --glass-border: 1px solid rgba(0, 0, 0, 0.1);
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="oled"] {
+  --bg-base: #000000;
+  --bg-sidebar: rgba(0, 0, 0, 0.95);
+  /* Other dark tokens inherited */
+}
+
+[data-theme="high-contrast"] {
+  --bg-surface: #1e293b;
+  --text-primary: #ffffff;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --border-subtle: #475569;
+  --accent-primary: #818cf8;
+}

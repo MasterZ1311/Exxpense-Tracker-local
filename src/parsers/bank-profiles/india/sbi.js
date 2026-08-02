@@ -1,0 +1,30 @@
+/** FinTrack Pro — SBI Bank Profile */
+export default {
+  id: 'sbi',
+  name: 'State Bank of India',
+  country: 'IN',
+  currency: 'INR',
+  signatures: ['State Bank', 'SBI'],
+  skipRows: 0,
+  headerRowKeyword: 'Txn Date',
+  columns: {
+    date: 'Txn Date',
+    valueDate: 'Value Date',
+    description: 'Description',
+    reference: 'Ref No./Cheque No.',
+    debit: 'Debit',
+    credit: 'Credit',
+    balance: 'Balance',
+  },
+  dateFormat: 'DD/MM/YYYY',
+  amountStyle: 'separate',
+  numberFormat: 'indian',
+  pdf: {
+    tableStartKeyword: 'Txn Date',
+    dateColumnX: [0, 80],
+    descriptionColumnX: [80, 350],
+    debitColumnX: [350, 450],
+    creditColumnX: [450, 550],
+    balanceColumnX: [550, 650],
+  },
+};
