@@ -1,6 +1,6 @@
 <div align="center">
 
-# 💸 FinTrack Pro
+# FinTrack Pro
 
 ### A Privacy-First, AI-Powered Personal Finance Tracker
 
@@ -21,21 +21,21 @@ It's designed for people who want a **powerful, professional-grade expense track
 
 ---
 
-## ✨ Key Features
+## Key Features
 
-### 📊 Dashboard & Analytics
-- **Real-time financial overview** — income vs. expenses, net balance, savings rate at a glance
+### Dashboard & Analytics
+- **Real-time financial overview** — income vs. expenses, net balance, and savings rate at a glance
 - **Interactive charts** (powered by Chart.js) — spending trends, category breakdowns, cash flow
 - **Smart KPIs** — monthly comparisons, streak tracking, top spending categories
 
-### 💳 Transaction Management
-- Add, edit, delete transactions with full metadata (amount, category, account, notes, tags)
+### Transaction Management
+- Add, edit, and delete transactions with full metadata (amount, category, account, notes, tags)
 - **Recurring transactions** — set daily/weekly/monthly/yearly repeating entries that auto-generate
 - **Advanced filtering** — by date range, category, account, type, and free-text search
 - **Split transactions** — divide one payment across multiple categories
 - **Bulk import** from bank statements (CSV, PDF, OFX/QFX)
 
-### 🏦 Bank Statement Import
+### Bank Statement Import
 - Supports **CSV, PDF, and OFX/QFX** file formats
 - **Auto-detects your bank** from Indian and international bank profiles:
   - **Indian Banks**: SBI, HDFC, ICICI, Axis, Kotak, PNB, BOB, Canara, Federal, IDFC
@@ -43,7 +43,7 @@ It's designed for people who want a **powerful, professional-grade expense track
 - Smart **deduplication** — never import the same transaction twice
 - **UPI transaction parsing** — extracts merchant names from Indian UPI/NEFT/IMPS descriptions
 
-### 🤖 AI-Powered Features
+### AI-Powered Features
 - **Automatic transaction categorization** with a 3-tier system:
   1. **Learned patterns** — remembers your manual corrections
   2. **Rule-based** — instant matching for 40+ known merchants (Swiggy, Uber, Amazon, etc.)
@@ -51,55 +51,56 @@ It's designed for people who want a **powerful, professional-grade expense track
 - **AI Financial Assistant** — chat with your financial data, ask questions like "How much did I spend on food last month?"
 - **Receipt scanning** via OCR (Tesseract.js) — photograph a receipt to extract amount & date automatically
 
-### 💰 Budget Management
+### Budget Management
 - Set **monthly/yearly/custom budgets** per category
 - Real-time **budget progress bars** with color-coded alerts
 - **Budget rollover** and carryover support
 - Notifications when approaching or exceeding limits
 
-### 🏧 Multiple Accounts
+### Multiple Accounts
 - Track **checking, savings, credit cards, cash, wallets, and investment accounts**
-- Per-account balance tracking with transaction history
+- Per-account balance tracking with full transaction history
 - **Multi-currency support** — 100+ world currencies with live exchange rates (cached 24h offline)
 - Indian number formatting (Lakhs/Crores) for INR accounts
 
-### 📈 Investments & Net Worth
+### Investments & Net Worth
 - Track stocks, mutual funds, crypto, real estate, and other assets
 - **Net worth timeline** — see your wealth grow over time
 - P&L calculation per investment
 
-### 📋 Reports & Export
+### Reports & Export
 - **PDF reports** with charts and summaries (via jsPDF + html2canvas)
 - **Excel/CSV export** (via SheetJS/xlsx)
-- Date-range reports, category reports, account statements
+- Date-range reports, category reports, and account statements
 
-### 🏢 Corporate Mode
+### Corporate Mode
 - Separate **corporate expense tracking** profile
-- Expense categories suited for business (Client Entertainment, Travel & Accommodation, Office Supplies, etc.)
-- Report generation for reimbursement
+- Categories suited for business (Client Entertainment, Travel & Accommodation, Office Supplies, etc.)
+- Report generation for reimbursement submissions
 
-### 🎯 Financial Goals & Debt Tracker
+### Financial Goals & Debt Tracker
 - Set savings goals with target amounts and deadlines
 - **Debt management** — track loans, EMIs, and payoff progress
 
-### ⚙️ Settings & Customization
+### Settings & Customization
 - **Dark mode** (default) with custom color themes
 - Custom expense categories with icons and colors
 - Currency and locale preferences
 - Data export/import (full backup & restore as JSON)
 - AES-256 encrypted backup export
 
-### 📱 Progressive Web App (PWA)
+### Progressive Web App (PWA)
 - **Install on any device** — works like a native app on desktop and mobile
 - **Full offline support** — all features work without internet
-- Responsive design — optimized for mobile and desktop
+- Responsive design optimized for both mobile and desktop
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### For End Users (No Installation Needed)
-If the app is hosted somewhere (or you open `dist/index.html`), just open it in a modern browser. No login, no signup. Your data stays on your device.
+
+Open the app in any modern browser. No login, no signup required. Your data stays entirely on your device.
 
 ### For Developers — Running Locally
 
@@ -127,11 +128,11 @@ npm run build
 npm run preview
 ```
 
-The production build goes into the `dist/` folder. You can host it on any static file server (Netlify, Vercel, GitHub Pages, Nginx, etc.).
+The production build outputs to the `dist/` folder. Host it on any static file server — Netlify, Vercel, GitHub Pages, Nginx, or similar.
 
 ---
 
-## 🗂️ Project Structure (High Level)
+## Project Structure
 
 ```
 Expense Tracker/
@@ -183,19 +184,19 @@ Expense Tracker/
 
 ---
 
-## 🔒 Privacy & Security
+## Privacy & Security
 
 | Concern | Answer |
 |---|---|
 | Where is my data stored? | 100% in your browser (IndexedDB) |
 | Does it send data to a server? | Never. Zero network requests for your data |
-| What about AI features? | On-device (WebLLM/Gemma 2B) by default. Optionally, you can use your own API key |
+| What about AI features? | On-device (WebLLM/Gemma 2B) by default. Optionally, use your own API key |
 | Can I export my data? | Yes — full JSON backup, CSV, or encrypted AES-256 export |
 | Can I use it offline? | Yes — full functionality offline after first load |
 
 ---
 
-## 🛠️ Technology Choices
+## Technology Stack
 
 | Technology | Purpose |
 |---|---|
@@ -213,7 +214,7 @@ Expense Tracker/
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature/your-feature-name`
@@ -223,7 +224,7 @@ Expense Tracker/
 
 ---
 
-## 📄 License
+## License
 
 MIT License — see [LICENSE](LICENSE) for details.
 
@@ -231,6 +232,6 @@ MIT License — see [LICENSE](LICENSE) for details.
 
 <div align="center">
 
-**Built with ❤️ — Your finances, your device, your privacy.**
+**Your finances. Your device. Your privacy.**
 
 </div>
