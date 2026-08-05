@@ -109,7 +109,7 @@ function renderUI() {
     currentContainer.innerHTML = `
       <div class="accounts-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 24px;">
         <h1 style="margin:0; font-size: 2rem; font-weight: 700;">Accounts</h1>
-        <button id="btn-add-account" style="padding: 10px 20px; background: var(--primary-color, #007bff); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">
+        <button id="btn-add-account" class="btn btn-primary">
           + Add Account
         </button>
       </div>
@@ -208,8 +208,8 @@ function renderModal() {
           </div>
           
           <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 16px;">
-            <button type="button" id="btn-cancel-modal" style="padding: 10px 20px; background: transparent; border: 1px solid var(--border-color, #ddd); border-radius: 8px; cursor: pointer; font-weight: bold;">Cancel</button>
-            <button type="submit" style="padding: 10px 20px; background: var(--primary-color, #007bff); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">Save Account</button>
+            <button type="button" id="btn-cancel-modal" class="btn btn-secondary">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Account</button>
           </div>
         </form>
       </div>
@@ -223,7 +223,7 @@ function renderDetailView() {
   
   return `
     <div>
-      <button id="btn-back" style="margin-bottom: 24px; padding: 8px 16px; background: transparent; border: 1px solid var(--border-color, #ddd); border-radius: 8px; cursor: pointer;">&larr; Back to Accounts</button>
+      <button id="btn-back" class="btn btn-ghost" style="margin-bottom: 24px;">&larr; Back to Accounts</button>
       
       <div style="background: var(--bg-surface, #fff); border-radius: 16px; padding: 32px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-top: 8px solid ${acc.color};">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
@@ -238,8 +238,8 @@ function renderDetailView() {
         </div>
         
         <div style="display: flex; gap: 12px; margin-bottom: 32px;">
-          <button id="btn-edit-account" style="padding: 10px 20px; background: var(--bg-secondary, #f0f0f0); border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">Edit Account</button>
-          <button id="btn-transfer" style="padding: 10px 20px; background: var(--primary-color, #007bff); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">Transfer Money</button>
+          <button id="btn-edit-account" class="btn btn-secondary">Edit Account</button>
+          <button id="btn-transfer" class="btn btn-primary">Transfer Money</button>
         </div>
         
         <h3>Recent Transactions</h3>

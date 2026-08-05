@@ -7,12 +7,74 @@
 import { openDB } from 'idb';
 
 const DB_NAME = 'fintrack-pro';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 /** @type {import('idb').IDBPDatabase | null} */
 let dbInstance = null;
 
 // ─── Database Initialization ──────────────────────────────────────────────────
+
+const REQUIRED_STORES = [
+  'profiles', 'transactions', 'accounts', 'investments',
+  'budgets', 'categories', 'bankProfiles', 'aiCache',
+  'exchangeRates', 'settings'
+];
+
+function upgradeSchema(db) {
+  // profiles — Individual & Corporate Individual profiles
+  if (!db.objectStoreNames.contains('profiles')) {
+    db.createObjectStore('profiles', { keyPath: 'id' });
+  }
+
+  // transactions — with indexes for querying
+  if (!db.objectStoreNames.contains('transactions')) {
+    const txStore = db.createObjectStore('transactions', { keyPath: 'id' });
+    txStore.createIndex('date', 'date', { unique: false });
+    txStore.createIndex('accountId', 'accountId', { unique: false });
+    txStore.createIndex('category', 'category', { unique: false });
+    txStore.createIndex('type', 'type', { unique: false });
+  }
+
+  // accounts
+  if (!db.objectStoreNames.contains('accounts')) {
+    db.createObjectStore('accounts', { keyPath: 'id' });
+  }
+
+  // investments
+  if (!db.objectStoreNames.contains('investments')) {
+    db.createObjectStore('investments', { keyPath: 'id' });
+  }
+
+  // budgets
+  if (!db.objectStoreNames.contains('budgets')) {
+    db.createObjectStore('budgets', { keyPath: 'id' });
+  }
+
+  // categories
+  if (!db.objectStoreNames.contains('categories')) {
+    db.createObjectStore('categories', { keyPath: 'id' });
+  }
+
+  // bankProfiles — saved import column mappings
+  if (!db.objectStoreNames.contains('bankProfiles')) {
+    db.createObjectStore('bankProfiles', { keyPath: 'id' });
+  }
+
+  // aiCache — categorization memory
+  if (!db.objectStoreNames.contains('aiCache')) {
+    db.createObjectStore('aiCache', { keyPath: 'id' });
+  }
+
+  // exchangeRates — keyed by currency code
+  if (!db.objectStoreNames.contains('exchangeRates')) {
+    db.createObjectStore('exchangeRates', { keyPath: 'currency' });
+  }
+
+  // settings — key-value store for app settings
+  if (!db.objectStoreNames.contains('settings')) {
+    db.createObjectStore('settings', { keyPath: 'key' });
+  }
+}
 
 /**
  * Open (or create) the IndexedDB database with all required object stores.
@@ -22,62 +84,20 @@ async function getDB() {
   if (dbInstance) return dbInstance;
 
   dbInstance = await openDB(DB_NAME, DB_VERSION, {
-    upgrade(db) {
-      // profiles — Individual & Corporate Individual profiles
-      if (!db.objectStoreNames.contains('profiles')) {
-        db.createObjectStore('profiles', { keyPath: 'id' });
-      }
-
-      // transactions — with indexes for querying
-      if (!db.objectStoreNames.contains('transactions')) {
-        const txStore = db.createObjectStore('transactions', { keyPath: 'id' });
-        txStore.createIndex('date', 'date', { unique: false });
-        txStore.createIndex('accountId', 'accountId', { unique: false });
-        txStore.createIndex('category', 'category', { unique: false });
-        txStore.createIndex('type', 'type', { unique: false });
-      }
-
-      // accounts
-      if (!db.objectStoreNames.contains('accounts')) {
-        db.createObjectStore('accounts', { keyPath: 'id' });
-      }
-
-      // investments
-      if (!db.objectStoreNames.contains('investments')) {
-        db.createObjectStore('investments', { keyPath: 'id' });
-      }
-
-      // budgets
-      if (!db.objectStoreNames.contains('budgets')) {
-        db.createObjectStore('budgets', { keyPath: 'id' });
-      }
-
-      // categories
-      if (!db.objectStoreNames.contains('categories')) {
-        db.createObjectStore('categories', { keyPath: 'id' });
-      }
-
-      // bankProfiles — saved import column mappings
-      if (!db.objectStoreNames.contains('bankProfiles')) {
-        db.createObjectStore('bankProfiles', { keyPath: 'id' });
-      }
-
-      // aiCache — categorization memory
-      if (!db.objectStoreNames.contains('aiCache')) {
-        db.createObjectStore('aiCache', { keyPath: 'id' });
-      }
-
-      // exchangeRates — keyed by currency code
-      if (!db.objectStoreNames.contains('exchangeRates')) {
-        db.createObjectStore('exchangeRates', { keyPath: 'currency' });
-      }
-
-      // settings — key-value store for app settings
-      if (!db.objectStoreNames.contains('settings')) {
-        db.createObjectStore('settings', { keyPath: 'key' });
-      }
-    },
+    upgrade: upgradeSchema,
   });
+
+  // Self-healing schema verification: if any required store is missing (due to schema drift without version bump),
+  // dynamically re-open with an incremented database version to trigger upgradeSchema.
+  const hasAllStores = REQUIRED_STORES.every(storeName => dbInstance.objectStoreNames.contains(storeName));
+  if (!hasAllStores) {
+    console.warn('[DB] Schema discrepancy detected (missing object store). Re-opening DB with incremented version...');
+    const targetVersion = dbInstance.version + 1;
+    dbInstance.close();
+    dbInstance = await openDB(DB_NAME, targetVersion, {
+      upgrade: upgradeSchema,
+    });
+  }
 
   return dbInstance;
 }

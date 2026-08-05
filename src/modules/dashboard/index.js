@@ -5,15 +5,29 @@ import { CATEGORY_MAP } from '../transactions/categories.js';
 let unsubscribe = null;
 
 function formatCurrency(amount) {
-  return new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    maximumFractionDigits: 2,
-  }).format(amount);
+  const settings = store.state.settings || {};
+  const locale = settings.locale || 'en-IN';
+  const currency = settings.baseCurrency || 'INR';
+  try {
+    return new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency: currency,
+      maximumFractionDigits: 2,
+    }).format(amount);
+  } catch (e) {
+    return `₹${Number(amount || 0).toFixed(2)}`;
+  }
+}
+
+function getTimeOfDay() {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Morning';
+  if (hour < 17) return 'Afternoon';
+  return 'Evening';
 }
 
 function calculateKPIs(transactions, accounts) {
-  const totalBalance = accounts.reduce((sum, acc) => sum + (acc.balance || 0), 0);
+  const totalBalance = accounts.reduce((sum, acc) => sum + (acc.currentBalance ?? acc.balance ?? 0), 0);
   
   const now = new Date();
   const currentMonthStr = now.toISOString().slice(0, 7); // YYYY-MM
@@ -22,15 +36,15 @@ function calculateKPIs(transactions, accounts) {
   let expensesThisMonth = 0;
   
   for (const tx of transactions) {
-    if (tx.date.startsWith(currentMonthStr)) {
-      if (tx.type === 'income') incomeThisMonth += tx.amount;
-      if (tx.type === 'expense') expensesThisMonth += tx.amount;
+    if (tx.date && tx.date.startsWith(currentMonthStr)) {
+      if (tx.type === 'income') incomeThisMonth += Number(tx.amount || 0);
+      if (tx.type === 'expense') expensesThisMonth += Number(tx.amount || 0);
     }
   }
   
   let savingsRate = 0;
   if (incomeThisMonth > 0) {
-    savingsRate = ((incomeThisMonth - expensesThisMonth) / incomeThisMonth) * 100;
+    savingsRate = Math.max(0, ((incomeThisMonth - expensesThisMonth) / incomeThisMonth) * 100);
   }
   
   return {
@@ -41,57 +55,65 @@ function calculateKPIs(transactions, accounts) {
   };
 }
 
-function renderRecentTransactions(transactions, accounts) {
+function renderRecentTransactions(transactions) {
   const recent = [...transactions].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 5);
   
   if (recent.length === 0) {
-    return `<div style="text-align:center;color:var(--text-secondary);padding:var(--space-4);">No recent transactions</div>`;
+    return `
+      <div class="empty-state-card">
+        <div class="empty-icon">💳✨</div>
+        <h4>Your financial ledger is currently spotless</h4>
+        <p>Record your income receipts, daily expenses, or transfers to begin visualizing cashflow patterns and AI financial insights.</p>
+        <button id="btn-record-first-tx" class="btn btn-primary">
+          + Record First Transaction
+        </button>
+      </div>
+    `;
   }
   
-  return recent.map(tx => {
+  return `<div style="display:flex; flex-direction:column; gap: var(--space-2);">` + recent.map(tx => {
     const isExpense = tx.type === 'expense';
     const isIncome = tx.type === 'income';
-    const amountColor = isIncome ? 'var(--accent-success)' : isExpense ? 'var(--accent-danger)' : 'var(--accent-tertiary)';
+    const amountColor = isIncome ? '#34d399' : isExpense ? '#fb7185' : '#818cf8';
     const prefix = isIncome ? '+' : isExpense ? '−' : '⇄';
     const cat = CATEGORY_MAP[tx.category];
-    const catName = cat?.label || tx.category || 'Other';
-    const catIcon = cat?.icon || '💰';
-    const catColor = cat?.colorHex || 'rgba(148,163,184,0.15)';
+    const catName = cat?.label || tx.category || 'Transfer';
+    const catIcon = cat?.icon || (isIncome ? '💵' : isExpense ? '🛍️' : '🔄');
+    const catColor = cat?.colorHex ? `${cat.colorHex}25` : 'rgba(129, 140, 248, 0.15)';
     
     return `
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:var(--space-2) 0;border-bottom:1px solid var(--border-subtle);">
-        <div style="display:flex;align-items:center;gap:var(--space-3);">
-          <div style="width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:${catColor};font-size:1.2rem;">
+      <div style="display:flex; align-items:center; justify-content:space-between; padding: var(--space-3) var(--space-4); background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); transition: background 0.2s ease, transform 0.2s ease; cursor: default;" onmouseover="this.style.background='rgba(255,255,255,0.04)'" onmouseout="this.style.background='rgba(0,0,0,0.2)'">
+        <div style="display:flex; align-items:center; gap: var(--space-3);">
+          <div style="width: 46px; height: 46px; border-radius: var(--radius-md); display:flex; align-items:center; justify-content:center; background: ${catColor}; font-size: 1.4rem; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);">
             ${catIcon}
           </div>
           <div>
-            <div style="font-weight:500;color:var(--text-primary);">${tx.description || tx.merchant || 'Transaction'}</div>
-            <div style="font-size:0.75rem;color:var(--text-secondary);">${catName} • ${new Date(tx.date).toLocaleDateString('en-IN', {day:'numeric', month:'short'})}</div>
+            <div style="font-weight: 600; font-size: 0.98rem; color: var(--text-primary);">${tx.description || tx.merchant || 'Transaction'}</div>
+            <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 2px;">
+              ${catName} • ${new Date(tx.date).toLocaleDateString(store.state.settings?.locale || 'en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+            </div>
           </div>
         </div>
-        <div style="font-weight:600;color:${amountColor};">
+        <div style="font-weight: 700; font-size: 1.05rem; color: ${amountColor}; font-family: var(--font-mono, monospace);">
           ${prefix}${formatCurrency(tx.amount)}
         </div>
       </div>
     `;
-  }).join('');
+  }).join('') + `</div>`;
 }
 
 function renderBudgetOverview(transactions, budgets) {
   const now = new Date();
   const currentMonthStr = now.toISOString().slice(0, 7);
   
-  // Calculate expenses per category this month
   const categoryExpenses = {};
   for (const tx of transactions) {
-    if (tx.type === 'expense' && tx.date.startsWith(currentMonthStr)) {
-      categoryExpenses[tx.category] = (categoryExpenses[tx.category] || 0) + tx.amount;
+    if (tx.type === 'expense' && tx.date && tx.date.startsWith(currentMonthStr)) {
+      categoryExpenses[tx.category] = (categoryExpenses[tx.category] || 0) + Number(tx.amount || 0);
     }
   }
   
-  // Prepare data for top 3 categories by expense or budget
   let topItems = [];
-  
   if (budgets && budgets.length > 0) {
     topItems = budgets.map(b => {
       const spent = categoryExpenses[b.categoryId] || 0;
@@ -107,121 +129,200 @@ function renderBudgetOverview(transactions, budgets) {
       .sort((a, b) => b[1] - a[1])
       .slice(0, 3)
       .map(([id, spent]) => {
-        // Mock a limit for display if no budget exists
-        const limit = spent > 0 ? spent * 1.5 : 100;
+        const limit = spent > 0 ? spent * 1.3 : 100;
         return {
           id,
           spent,
           limit,
-          percentage: (spent / limit) * 100
+          percentage: Math.min(100, (spent / limit) * 100)
         };
       });
   }
   
   if (topItems.length === 0) {
-    return `<div style="text-align:center;color:var(--text-secondary);padding:var(--space-4);">No data for this month</div>`;
+    return `
+      <div class="empty-state-card" style="padding: var(--space-6) var(--space-4);">
+        <div class="empty-icon" style="font-size: 2.6rem;">🎯</div>
+        <h4>No spending caps defined</h4>
+        <p>Set budget envelopes for categories like Dining and Utilities to prevent overspending and enable AI alerts.</p>
+        <a href="#/budgets" class="btn btn-secondary" style="text-decoration: none; margin-top: var(--space-2);">
+          Configure Budgets &rarr;
+        </a>
+      </div>
+    `;
   }
   
-  return `<div style="display:flex;justify-content:space-around;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-4) 0;">
-    ${topItems.map(item => {
+  return `<div style="display:flex; justify-content:space-around; flex-wrap:wrap; gap: var(--space-4); padding: var(--space-2) 0;">` +
+    topItems.map(item => {
       const cat = CATEGORY_MAP[item.id];
       const catName = cat?.label || item.id;
-      const radius = 36;
+      const radius = 38;
       const circumference = 2 * Math.PI * radius;
       const offset = circumference - (item.percentage / 100) * circumference;
-      const color = item.percentage > 90 ? 'var(--accent-danger)' : item.percentage > 75 ? 'var(--accent-warning)' : 'var(--accent-primary)';
+      const color = item.percentage > 90 ? '#f43f5e' : item.percentage > 75 ? '#f59e0b' : '#3b82f6';
       
       return `
-        <div style="display:flex;flex-direction:column;align-items:center;gap:var(--space-2);">
-          <div style="position:relative;width:80px;height:80px;">
-            <svg class="progress-ring" width="80" height="80" style="transform:rotate(-90deg);">
-              <circle cx="40" cy="40" r="${radius}" fill="transparent" stroke="var(--border-subtle)" stroke-width="6"/>
-              <circle cx="40" cy="40" r="${radius}" fill="transparent" stroke="${color}" stroke-width="6" 
+        <div style="display:flex; flex-direction:column; align-items:center; gap: var(--space-2); min-width: 110px; background: rgba(0, 0, 0, 0.15); padding: var(--space-4) var(--space-3); border-radius: var(--radius-lg); border: 1px solid var(--border-subtle);">
+          <div style="position:relative; width:88px; height:88px;">
+            <svg class="progress-ring" width="88" height="88" style="transform:rotate(-90deg);">
+              <circle cx="44" cy="44" r="${radius}" fill="transparent" stroke="rgba(255, 255, 255, 0.08)" stroke-width="6"/>
+              <circle cx="44" cy="44" r="${radius}" fill="transparent" stroke="${color}" stroke-width="6" 
                 stroke-dasharray="${circumference} ${circumference}" 
                 stroke-dashoffset="${offset}" 
                 stroke-linecap="round" 
-                style="transition: stroke-dashoffset 0.5s ease-in-out;"/>
+                style="transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1);"/>
             </svg>
-            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.5rem;">
-              ${cat?.icon || '💰'}
+            <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:1.6rem;">
+              ${cat?.icon || '📦'}
             </div>
           </div>
-          <div style="text-align:center;">
-            <div style="font-size:0.85rem;font-weight:600;color:var(--text-primary);">${catName}</div>
-            <div style="font-size:0.75rem;color:var(--text-secondary);">${Math.round(item.percentage)}% used</div>
+          <div style="text-align:center; width: 100%;">
+            <div style="font-size:0.9rem; font-weight:700; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${catName}</div>
+            <div style="font-size:0.75rem; color: ${color}; font-weight: 600; margin-top: 2px;">${Math.round(item.percentage)}% consumed</div>
+            <div style="font-size:0.72rem; color:var(--text-muted);">${formatCurrency(item.spent)}</div>
           </div>
         </div>
       `;
-    }).join('')}
-  </div>`;
+    }).join('') + `</div>`;
 }
 
 export function renderDashboard(container) {
-  const { transactions, accounts, budgets } = store.state;
+  const { transactions = [], accounts = [], budgets = [], profile } = store.state;
   const kpis = calculateKPIs(transactions, accounts);
-  
+  const userName = profile ? (profile.name || profile.companyName || 'Pro User') : 'Pro User';
+  const monthName = new Date().toLocaleDateString(store.state.settings?.locale || 'en-IN', { month: 'long', year: 'numeric' });
+
   container.innerHTML = `
-    <div class="dashboard-layout" style="position:relative;min-height:100%;">
-      <!-- Top Row: KPIs -->
+    <div class="dashboard-layout">
+      <!-- Hero Greeting Banner -->
+      <div class="dashboard-hero">
+        <div class="hero-content">
+          <h2>✨ Good ${getTimeOfDay()}, ${userName}</h2>
+          <p>Welcome to your financial command center. Track liquidity across active accounts, monitor spending velocity, and leverage AI financial diagnostics in real time.</p>
+        </div>
+        <div class="hero-actions">
+          <button id="hero-quick-add" class="btn btn-primary" style="box-shadow: 0 0 24px rgba(129, 140, 248, 0.45);">+ New Transaction</button>
+          <a href="#/ai" class="btn btn-secondary" style="text-decoration: none;">🤖 AI Advisor</a>
+        </div>
+      </div>
+
+      <!-- KPI Summary Row -->
       <div class="kpi-row">
-        <div class="glass-card stat-card">
-          <span class="stat-label">Total Balance</span>
-          <span class="stat-value" style="color: ${kpis.totalBalance >= 0 ? 'var(--accent-success)' : 'var(--accent-danger)'};">
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <span class="kpi-title">Net Liquidity</span>
+            <div class="kpi-icon" style="background: rgba(16, 185, 129, 0.15); color: #34d399;">🏦</div>
+          </div>
+          <div class="kpi-value" style="color: ${kpis.totalBalance >= 0 ? '#34d399' : '#fb7185'};">
             ${formatCurrency(kpis.totalBalance)}
-          </span>
+          </div>
+          <div class="kpi-footer">
+            <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#34d399;"></span>
+            <span>Across ${accounts.length} active account${accounts.length !== 1 ? 's' : ''}</span>
+          </div>
         </div>
-        <div class="glass-card stat-card">
-          <span class="stat-label">Income this Month</span>
-          <span class="stat-value" style="color: var(--accent-success);">
+
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <span class="kpi-title">Inflows (${new Date().toLocaleString('default', { month: 'short' })})</span>
+            <div class="kpi-icon" style="background: rgba(59, 130, 246, 0.15); color: #60a5fa;">📈</div>
+          </div>
+          <div class="kpi-value" style="color: #60a5fa;">
             ${formatCurrency(kpis.incomeThisMonth)}
-          </span>
+          </div>
+          <div class="kpi-footer">
+            <span>Monthly realized earnings</span>
+          </div>
         </div>
-        <div class="glass-card stat-card">
-          <span class="stat-label">Expenses this Month</span>
-          <span class="stat-value" style="color: var(--accent-danger);">
+
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <span class="kpi-title">Outflow (${new Date().toLocaleString('default', { month: 'short' })})</span>
+            <div class="kpi-icon" style="background: rgba(244, 63, 94, 0.15); color: #fb7185;">📉</div>
+          </div>
+          <div class="kpi-value" style="color: #fb7185;">
             ${formatCurrency(kpis.expensesThisMonth)}
-          </span>
+          </div>
+          <div class="kpi-footer">
+            <span>Total monthly expenses</span>
+          </div>
         </div>
-        <div class="glass-card stat-card">
-          <span class="stat-label">Savings Rate</span>
-          <span class="stat-value" style="color: ${kpis.savingsRate > 20 ? 'var(--accent-success)' : 'var(--accent-warning)'};">
+
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <span class="kpi-title">Savings Efficiency</span>
+            <div class="kpi-icon" style="background: rgba(192, 132, 252, 0.15); color: #c084fc;">💎</div>
+          </div>
+          <div class="kpi-value" style="color: ${Number(kpis.savingsRate) > 20 ? '#c084fc' : '#fbbf24'};">
             ${kpis.savingsRate}%
-          </span>
+          </div>
+          <div class="kpi-footer">
+            <span>Target: >20% retained</span>
+          </div>
         </div>
       </div>
       
-      <!-- Middle Row -->
-      <div class="charts-grid">
-        <div class="glass-card">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-4);">
-            <h3 style="font-size:1.125rem;font-weight:600;">Recent Transactions</h3>
-            <a href="#/transactions" style="color:var(--accent-primary);text-decoration:none;font-size:0.875rem;">View All</a>
+      <!-- Main Content Grid -->
+      <div class="dashboard-main-grid">
+        <!-- Left: Recent Activity Ledger -->
+        <div class="dashboard-section-card">
+          <div class="section-header">
+            <h3><span>💳</span> Recent Ledger Activity</h3>
+            <a href="#/transactions" style="color: var(--accent-primary); text-decoration: none; font-size: 0.88rem; font-weight: 600; transition: opacity 0.2s;" onmouseover="this.style.opacity=0.8" onmouseout="this.style.opacity=1">View Full Ledger &rarr;</a>
           </div>
-          <div class="recent-transactions">
-            ${renderRecentTransactions(transactions, accounts)}
+          <div style="margin-top: var(--space-2);">
+            ${renderRecentTransactions(transactions)}
           </div>
         </div>
         
-        <div class="glass-card">
-          <h3 style="font-size:1.125rem;font-weight:600;margin-bottom:var(--space-4);">Budget Overview</h3>
-          ${renderBudgetOverview(transactions, budgets)}
+        <!-- Right: Budget Envelopes & AI Quick Pulse -->
+        <div style="display:flex; flex-direction:column; gap: var(--space-6);">
+          <div class="dashboard-section-card">
+            <div class="section-header">
+              <h3><span>🎯</span> Budget Allocation</h3>
+              <span style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">${monthName}</span>
+            </div>
+            ${renderBudgetOverview(transactions, budgets)}
+          </div>
+
+          <div class="dashboard-section-card" style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.8) 100%); border-color: rgba(99, 102, 241, 0.25);">
+            <div class="section-header" style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+              <h3><span>⚡</span> Financial Pulse</h3>
+              <span class="badge" style="background: rgba(99,102,241,0.2); color: #a5b4fc; border: 1px solid rgba(99,102,241,0.4);">LIVE</span>
+            </div>
+            <p style="color: var(--text-secondary); font-size: 0.88rem; line-height: 1.6; margin: 0;">
+              💡 <strong>Pro Tip:</strong> Link your recurring utility bills and investment SIPs in FinTrack Pro to receive predictive AI insights and automated cashflow forecasts.
+            </p>
+          </div>
         </div>
       </div>
       
-      <!-- Floating Quick Add -->
-      <button id="quick-add-btn" style="position:fixed;bottom:var(--space-6);right:var(--space-6);width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));color:#fff;border:none;box-shadow:0 4px 20px rgba(99,102,241,0.5);display:flex;align-items:center;justify-content:center;font-size:1.5rem;cursor:pointer;z-index:90;transition:transform 0.2s;">
+      <!-- Floating Action Button (FAB) -->
+      <button id="quick-add-btn" title="Record Transaction" style="position:fixed; bottom:var(--space-6); right:var(--space-6); width:62px; height:62px; border-radius:50%; background:linear-gradient(135deg, var(--accent-primary, #6366f1), var(--accent-secondary, #c084fc)); color:#fff; border:none; box-shadow: 0 6px 25px rgba(99, 102, 241, 0.6); display:flex; align-items:center; justify-content:center; font-size:1.8rem; cursor:pointer; z-index:90; transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;">
         +
       </button>
     </div>
   `;
   
+  const wireButton = (id, handler) => {
+    const btn = container.querySelector(id);
+    if (btn) btn.addEventListener('click', handler);
+  };
+
+  wireButton('#hero-quick-add', () => openModal());
+  wireButton('#btn-record-first-tx', () => openModal());
+  
   const quickAddBtn = container.querySelector('#quick-add-btn');
   if (quickAddBtn) {
-    quickAddBtn.addEventListener('click', () => {
-      openModal();
+    quickAddBtn.addEventListener('click', () => openModal());
+    quickAddBtn.addEventListener('mouseover', () => {
+      quickAddBtn.style.transform = 'scale(1.1) rotate(90deg)';
+      quickAddBtn.style.boxShadow = '0 8px 32px rgba(192, 132, 252, 0.8)';
     });
-    quickAddBtn.addEventListener('mouseover', () => quickAddBtn.style.transform = 'scale(1.1)');
-    quickAddBtn.addEventListener('mouseout', () => quickAddBtn.style.transform = 'scale(1)');
+    quickAddBtn.addEventListener('mouseout', () => {
+      quickAddBtn.style.transform = 'scale(1) rotate(0deg)';
+      quickAddBtn.style.boxShadow = '0 6px 25px rgba(99, 102, 241, 0.6)';
+    });
   }
 }
 
@@ -229,9 +330,8 @@ export default {
   render(container) {
     renderDashboard(container);
     
-    // Subscribe to changes in accounts, transactions, or budgets
     unsubscribe = store.subscribeAll((key) => {
-      if (['transactions', 'accounts', 'budgets'].includes(key)) {
+      if (['transactions', 'accounts', 'budgets', 'profile', 'settings'].includes(key)) {
         renderDashboard(container);
       }
     });

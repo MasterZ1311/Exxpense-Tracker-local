@@ -3,6 +3,7 @@
  * Entry point: runs migration, loads state, initializes router, registers SW.
  */
 
+import './styles/base.css';
 import { migrate, getAll, getById } from './db.js';
 import { initRouter } from './router.js';
 import { store } from './store.js';
