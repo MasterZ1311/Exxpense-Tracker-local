@@ -1,0 +1,20 @@
+{
+  "name": "fintrack-pro-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "mobile": "npm run start --workspace=apps/mobile",
+    "mobile:android": "npm run android --workspace=apps/mobile",
+    "mobile:web": "npm run web --workspace=apps/mobile",
+    "build:domain": "npm run build --workspace=packages/domain",
+    "test": "npm run test --workspaces --if-present",
+    "check-types": "npm run check-types --workspaces --if-present"
+  },
+  "devDependencies": {
+    "typescript": "~5.3.3"
+  }
+}

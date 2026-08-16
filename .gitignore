@@ -1,0 +1,10 @@
+node_modules/
+.expo/
+dist/
+build/
+*.log
+.DS_Store
+*.local
+.env
+.env.*.local
+.system_generated/

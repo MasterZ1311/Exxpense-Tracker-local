@@ -1,0 +1,34 @@
+{
+  "expo": {
+    "name": "FinTrack Pro",
+    "slug": "fintrack-pro-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "backgroundColor": "#F4F1E8",
+      "resizeMode": "contain"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.fintrack.pro"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#F4F1E8"
+      },
+      "package": "com.fintrack.pro"
+    },
+    "web": {
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-sqlite",
+      "expo-secure-store"
+    ],
+    "scheme": "fintrack"
+  }
+}
