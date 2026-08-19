@@ -1,30 +1,52 @@
 import React, { useState } from 'react';
-import { View, ScrollView, StyleSheet, TouchableOpacity, Modal, Alert } from 'react-native';
+import { View, ScrollView, StyleSheet, TouchableOpacity, Modal, Switch, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { useFinance } from '../../src/state/FinanceContext';
+import { useSecurity } from '../../src/security/SecurityContext';
 import { Text, LedgerLabel, EditorialHeadline } from '../../src/components/Typography';
 import { LedgerLine } from '../../src/components/LedgerLine';
 import { Button } from '../../src/components/Button';
 import { AddCategoryModal } from '../../src/features/categories/AddCategoryModal';
+import { shareCsvFile } from '../../src/utils/fileSharing';
 import { ThemeType } from '../../src/theme';
 
 export default function MoreScreen() {
   const { colors, theme, setTheme, radii } = useTheme();
   const { profile, categories, addCategory, exportCsvString, transactions } = useFinance();
+  const {
+    isBiometricsSupported,
+    isBiometricsEnabled,
+    biometricTypeName,
+    toggleBiometrics,
+    lockApp,
+  } = useSecurity();
   const router = useRouter();
 
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
-  const [csvExportSuccess, setCsvExportSuccess] = useState<string | null>(null);
+  const [isSharingCsv, setIsSharingCsv] = useState(false);
+  const [csvStatusMessage, setCsvStatusMessage] = useState<string | null>(null);
 
-  const handleExportCsv = () => {
+  const handleShareCsv = async () => {
     try {
+      setIsSharingCsv(true);
       const csv = exportCsvString();
-      setCsvExportSuccess(`Exported ${transactions.length} rows to CSV format successfully.`);
-      setTimeout(() => setCsvExportSuccess(null), 4000);
+      const dateStr = new Date().toISOString().split('T')[0];
+      await shareCsvFile(`fintrack_ledger_${dateStr}`, csv);
+      setCsvStatusMessage(`Exported ${transactions.length} rows to CSV share sheet.`);
+      setTimeout(() => setCsvStatusMessage(null), 4000);
     } catch (e: any) {
       Alert.alert('Export Failed', e.message);
+    } finally {
+      setIsSharingCsv(false);
+    }
+  };
+
+  const handleToggleBiometrics = async (val: boolean) => {
+    const success = await toggleBiometrics(val);
+    if (!success && val) {
+      Alert.alert('Authentication Failed', `Could not enable ${biometricTypeName}.`);
     }
   };
 
@@ -58,6 +80,43 @@ export default function MoreScreen() {
         <View style={styles.header}>
           <LedgerLabel style={styles.headerLabel}>SYSTEM & PREFERENCES</LedgerLabel>
           <EditorialHeadline size={28}>More</EditorialHeadline>
+        </View>
+
+        <LedgerLine />
+
+        {/* Security & Biometrics Section */}
+        <View style={styles.section}>
+          <LedgerLabel style={styles.sectionLabel}>PRIVACY & BIOMETRIC SECURITY</LedgerLabel>
+          <View style={styles.switchRow}>
+            <View style={{ flex: 1, paddingRight: 12 }}>
+              <Text variant="medium" size={15} color={colors.ink}>
+                Require {biometricTypeName} Lock
+              </Text>
+              <Text variant="caption" color={colors.inkMuted} style={{ marginTop: 2 }}>
+                {isBiometricsSupported
+                  ? `Prompt ${biometricTypeName} when opening or switching to FinTrack Pro.`
+                  : 'Hardware biometrics not supported or not enrolled on this device.'}
+              </Text>
+            </View>
+            <Switch
+              value={isBiometricsEnabled}
+              onValueChange={handleToggleBiometrics}
+              disabled={!isBiometricsSupported}
+              trackColor={{ false: colors.bone, true: colors.moss }}
+              thumbColor={isBiometricsEnabled ? colors.paper : colors.inkSubtle}
+            />
+          </View>
+
+          {isBiometricsEnabled && (
+            <TouchableOpacity
+              onPress={lockApp}
+              style={[styles.lockNowBtn, { backgroundColor: colors.bone, borderColor: colors.border }]}
+            >
+              <Text variant="semibold" size={12} color={colors.ink}>
+                🔒 LOCK APP NOW
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         <LedgerLine />
@@ -128,21 +187,22 @@ export default function MoreScreen() {
 
         <LedgerLine />
 
-        {/* Direct CSV Export Engine */}
+        {/* Direct CSV Export Engine with Native Sharing */}
         <View style={styles.section}>
           <LedgerLabel style={styles.sectionLabel}>DIRECT CSV EXPORT</LedgerLabel>
           <Text variant="secondary" size={13} style={{ marginBottom: 12 }}>
-            Export all {transactions.length} ledger transactions to standard CSV for spreadsheet analysis.
+            Share all {transactions.length} ledger transactions to standard CSV via AirDrop, Google Drive, WhatsApp, or Files.
           </Text>
           <Button
-            title="EXPORT LEDGER TO CSV"
+            title="SHARE CSV TO DEVICE / APPS"
             size="md"
             variant="secondary"
-            onPress={handleExportCsv}
+            loading={isSharingCsv}
+            onPress={handleShareCsv}
           />
-          {csvExportSuccess && (
+          {csvStatusMessage && (
             <Text variant="caption" color={colors.moss} style={{ marginTop: 8 }}>
-              ✓ {csvExportSuccess}
+              ✓ {csvStatusMessage}
             </Text>
           )}
         </View>
@@ -174,7 +234,7 @@ export default function MoreScreen() {
         {/* Version info */}
         <View style={styles.footer}>
           <Text variant="caption" color={colors.inkSubtle}>
-            FinTrack Pro Mobile v1.0.0 · Zero-Backend Local SQLite
+            FinTrack Pro Mobile v1.0.0 · Zero-Backend Local SQLite · Native Privacy
           </Text>
         </View>
       </ScrollView>
@@ -242,6 +302,20 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     marginBottom: 10,
+  },
+  switchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 4,
+  },
+  lockNowBtn: {
+    marginTop: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 6,
+    borderWidth: 1,
+    alignSelf: 'flex-start',
   },
   themeRow: {
     flexDirection: 'row',

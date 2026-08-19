@@ -13,6 +13,8 @@ import {
 import { DMSerifDisplay_400Regular } from '@expo-google-fonts/dm-serif-display';
 import { ThemeProvider, useTheme } from '../src/theme/ThemeContext';
 import { FinanceProvider, useFinance } from '../src/state/FinanceContext';
+import { SecurityProvider } from '../src/security/SecurityContext';
+import { BiometricLockGate } from '../src/security/BiometricLockGate';
 
 function RootNavigation() {
   const { colors, isDark } = useTheme();
@@ -106,9 +108,13 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <ThemeProvider>
-        <FinanceProvider>
-          <RootNavigation />
-        </FinanceProvider>
+        <SecurityProvider>
+          <BiometricLockGate>
+            <FinanceProvider>
+              <RootNavigation />
+            </FinanceProvider>
+          </BiometricLockGate>
+        </SecurityProvider>
       </ThemeProvider>
     </SafeAreaProvider>
   );

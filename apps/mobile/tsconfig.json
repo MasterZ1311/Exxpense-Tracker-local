@@ -4,14 +4,16 @@
     "strict": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"],
-      "@fintrack/domain": ["../../packages/domain/src"]
+      "@/*": [
+        "./src/*"
+      ],
+      "@fintrack/domain": [
+        "../../packages/domain/src"
+      ]
     }
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx",
-    ".expo/types/**/*.ts",
-    "expo-env.d.ts"
+    "**/*.tsx"
   ]
 }

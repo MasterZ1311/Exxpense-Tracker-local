@@ -14,6 +14,7 @@ import { Text, LedgerLabel, EditorialHeadline } from '../src/components/Typograp
 import { LedgerLine } from '../src/components/LedgerLine';
 import { Button } from '../src/components/Button';
 import { formatCurrency, parseBankStatementCsv, ParsedCsvTransaction } from '@fintrack/domain';
+import { pickDocumentFile } from '../src/utils/fileSharing';
 
 const SAMPLE_CSV = `Date,Description,Category,Type,Amount
 2026-08-10,Starbucks Reserve,Food & Dining,EXPENSE,450.00
@@ -28,10 +29,29 @@ export default function ImportStatementScreen() {
   const router = useRouter();
 
   const [stage, setStage] = useState<'select' | 'read' | 'review' | 'imported'>('select');
-  const [selectedFormat, setSelectedFormat] = useState<'CSV' | 'PDF' | 'PASTE'>('CSV');
+  const [selectedFormat, setSelectedFormat] = useState<'CSV' | 'PASTE'>('CSV');
   const [rawInput, setRawInput] = useState(SAMPLE_CSV);
   const [parsedBatch, setParsedBatch] = useState<ParsedCsvTransaction[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isPicking, setIsPicking] = useState(false);
+
+  const handlePickDocument = async () => {
+    try {
+      setIsPicking(true);
+      const file = await pickDocumentFile(['text/csv', 'text/plain', '*/*']);
+      if (file && file.content) {
+        setRawInput(file.content);
+        // Automatically parse
+        const parsed = parseBankStatementCsv(file.content);
+        setParsedBatch(parsed);
+        setStage('review');
+      }
+    } catch (e: any) {
+      console.error(e);
+    } finally {
+      setIsPicking(false);
+    }
+  };
 
   const handleStartRead = () => {
     setStage('read');
@@ -118,31 +138,15 @@ export default function ImportStatementScreen() {
               Paste bank CSV data or edit the sample statement below to parse and normalize into your SQLite ledger.
             </Text>
 
-            <View style={styles.formatRow}>
-              {(['CSV', 'PASTE'] as const).map((fmt) => (
-                <TouchableOpacity
-                  key={fmt}
-                  onPress={() => setSelectedFormat(fmt)}
-                  style={[
-                    styles.formatBtn,
-                    {
-                      backgroundColor: selectedFormat === fmt ? colors.ink : colors.bone,
-                      borderRadius: radii.sm,
-                    },
-                  ]}
-                >
-                  <Text
-                    variant={selectedFormat === fmt ? 'semibold' : 'body'}
-                    size={14}
-                    color={selectedFormat === fmt ? colors.paper : colors.ink}
-                  >
-                    {fmt}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
+            <Button
+              title="CHOOSE CSV FILE FROM DEVICE"
+              variant="secondary"
+              loading={isPicking}
+              onPress={handlePickDocument}
+              style={{ marginVertical: 12 }}
+            />
 
-            <LedgerLabel style={[styles.sectionLabel, { marginTop: 16 }]}>STATEMENT CSV DATA</LedgerLabel>
+            <LedgerLabel style={[styles.sectionLabel, { marginTop: 12 }]}>OR PASTE / EDIT CSV DATA</LedgerLabel>
             <TextInput
               value={rawInput}
               onChangeText={setRawInput}

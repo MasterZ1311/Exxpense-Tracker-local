@@ -9,10 +9,9 @@ import {
   Platform,
 } from 'react-native';
 import { useTheme } from '../../theme/ThemeContext';
-import { Text, LedgerLabel, DisplayNumber } from '../../components/Typography';
+import { Text, LedgerLabel } from '../../components/Typography';
 import { SegmentedControl } from '../../components/SegmentedControl';
 import { Button } from '../../components/Button';
-import { LedgerLine } from '../../components/LedgerLine';
 import {
   Transaction,
   TransactionType,
@@ -30,6 +29,8 @@ interface AddTransactionFormProps {
   profileId: string;
 }
 
+const QUICK_AMOUNT_PRESETS = [100, 500, 1000, 2000, 5000];
+
 export const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
   accounts,
   categories,
@@ -38,7 +39,7 @@ export const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
   onCancel,
   profileId,
 }) => {
-  const { colors, typography, radii, spacing } = useTheme();
+  const { colors, typography, radii } = useTheme();
 
   const [type, setType] = useState<TransactionType>('expense');
   const [amountStr, setAmountStr] = useState<string>('');
@@ -55,6 +56,89 @@ export const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
   const currencySymbol = getCurrencySymbol(currency);
   const availableCategories = categories.filter((c) => c.type === type);
 
+  // Quick Amount preset increment handler
+  const handleQuickAddAmount = (addVal: number) => {
+    const current = parseFloat(amountStr) || 0;
+    const next = current + addVal;
+    setAmountStr(next.toString());
+  };
+
+  // Smart Category Auto-Detection as user types description
+  const handleDescriptionChange = (text: string) => {
+    setDescription(text);
+    const lower = text.toLowerCase().trim();
+
+    if (type === 'expense') {
+      if (
+        lower.includes('swiggy') ||
+        lower.includes('zomato') ||
+        lower.includes('food') ||
+        lower.includes('dinner') ||
+        lower.includes('lunch') ||
+        lower.includes('coffee') ||
+        lower.includes('chai') ||
+        lower.includes('starbucks') ||
+        lower.includes('grocery') ||
+        lower.includes('supermarket')
+      ) {
+        const cat = categories.find((c) => c.name.toLowerCase().includes('food'));
+        if (cat) setSelectedCategory(cat.name);
+      } else if (
+        lower.includes('uber') ||
+        lower.includes('ola') ||
+        lower.includes('fuel') ||
+        lower.includes('petrol') ||
+        lower.includes('diesel') ||
+        lower.includes('metro') ||
+        lower.includes('auto') ||
+        lower.includes('cab') ||
+        lower.includes('flight')
+      ) {
+        const cat = categories.find((c) => c.name.toLowerCase().includes('transport'));
+        if (cat) setSelectedCategory(cat.name);
+      } else if (
+        lower.includes('amazon') ||
+        lower.includes('flipkart') ||
+        lower.includes('myntra') ||
+        lower.includes('cloth') ||
+        lower.includes('mall') ||
+        lower.includes('shopping')
+      ) {
+        const cat = categories.find((c) => c.name.toLowerCase().includes('shopping'));
+        if (cat) setSelectedCategory(cat.name);
+      } else if (
+        lower.includes('wifi') ||
+        lower.includes('internet') ||
+        lower.includes('airtel') ||
+        lower.includes('jio') ||
+        lower.includes('electricity') ||
+        lower.includes('rent') ||
+        lower.includes('water') ||
+        lower.includes('bill')
+      ) {
+        const cat = categories.find((c) => c.name.toLowerCase().includes('bill'));
+        if (cat) setSelectedCategory(cat.name);
+      } else if (
+        lower.includes('movie') ||
+        lower.includes('netflix') ||
+        lower.includes('spotify') ||
+        lower.includes('game') ||
+        lower.includes('party')
+      ) {
+        const cat = categories.find((c) => c.name.toLowerCase().includes('entertainment'));
+        if (cat) setSelectedCategory(cat.name);
+      }
+    } else if (type === 'income') {
+      if (lower.includes('salary') || lower.includes('payroll') || lower.includes('bonus')) {
+        const cat = categories.find((c) => c.name.toLowerCase().includes('salary'));
+        if (cat) setSelectedCategory(cat.name);
+      } else if (lower.includes('freelance') || lower.includes('client') || lower.includes('project')) {
+        const cat = categories.find((c) => c.name.toLowerCase().includes('freelance'));
+        if (cat) setSelectedCategory(cat.name);
+      }
+    }
+  };
+
   const handleSubmit = async () => {
     const amount = parseFloat(amountStr);
     if (isNaN(amount) || amount <= 0) {
@@ -62,10 +146,8 @@ export const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
       return;
     }
 
-    if (!description.trim()) {
-      setErrorMessage('Please enter what this was for.');
-      return;
-    }
+    // Zero-friction defaulting: If description left blank, default to selected category name
+    const finalDescription = description.trim() || selectedCategory;
 
     if (!selectedAccountId && accounts.length > 0) {
       setErrorMessage('Please select an account.');
@@ -78,7 +160,7 @@ export const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
       await onSave({
         profileId,
         date: new Date().toISOString(),
-        description: description.trim(),
+        description: finalDescription,
         amount,
         currency,
         category: selectedCategory,
@@ -136,7 +218,6 @@ export const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
             <TextInput
               value={amountStr}
               onChangeText={(val) => {
-                // allow numbers and one decimal
                 const cleaned = val.replace(/[^0-9.]/g, '');
                 setAmountStr(cleaned);
               }}
@@ -153,15 +234,59 @@ export const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
               ]}
             />
           </View>
+
+          {/* Quick Increment Preset Chips */}
+          <View style={styles.presetsRow}>
+            {QUICK_AMOUNT_PRESETS.map((preset) => (
+              <TouchableOpacity
+                key={preset}
+                onPress={() => handleQuickAddAmount(preset)}
+                style={[
+                  styles.presetChip,
+                  {
+                    backgroundColor: colors.bone,
+                    borderColor: colors.border,
+                    borderRadius: radii.sm,
+                  },
+                ]}
+              >
+                <Text variant="semibold" size={11} color={colors.ink}>
+                  +{currencySymbol}{preset >= 1000 ? `${preset / 1000}k` : preset}
+                </Text>
+              </TouchableOpacity>
+            ))}
+            {amountStr.length > 0 && (
+              <TouchableOpacity
+                onPress={() => setAmountStr('')}
+                style={[
+                  styles.presetChip,
+                  {
+                    backgroundColor: colors.bone,
+                    borderColor: colors.border,
+                    borderRadius: radii.sm,
+                  },
+                ]}
+              >
+                <Text variant="semibold" size={11} color={colors.terracotta}>
+                  CLEAR
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
         </View>
 
-        {/* Description ("What was this for?") */}
+        {/* Description ("What was this for?") with Smart Auto-Categorization */}
         <View style={styles.inputGroup}>
-          <LedgerLabel style={styles.inputLabel}>WHAT WAS THIS FOR?</LedgerLabel>
+          <View style={styles.labelRow}>
+            <LedgerLabel style={styles.inputLabel}>WHAT WAS THIS FOR?</LedgerLabel>
+            <Text variant="caption" color={colors.inkSubtle} size={11}>
+              Auto-categorizes as you type
+            </Text>
+          </View>
           <TextInput
             value={description}
-            onChangeText={setDescription}
-            placeholder="e.g. Lunch, Grocery, Client payment"
+            onChangeText={handleDescriptionChange}
+            placeholder={`Optional (defaults to ${selectedCategory})`}
             placeholderTextColor={colors.inkSubtle}
             style={[
               styles.textInput,
@@ -255,9 +380,9 @@ export const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
           </Text>
         )}
 
-        {/* Save CTA */}
+        {/* Save CTA - 1-Tap Log */}
         <Button
-          title="RECORD TRANSACTION"
+          title={amountStr ? `RECORD ${currencySymbol}${amountStr}` : 'RECORD TRANSACTION'}
           size="lg"
           loading={isSubmitting}
           onPress={handleSubmit}
@@ -280,18 +405,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 14,
   },
   headerTitle: {
     fontSize: 11,
   },
   typeSelector: {
-    marginBottom: 20,
+    marginBottom: 16,
   },
   amountSection: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginVertical: 12,
+    marginVertical: 8,
   },
   amountRow: {
     flexDirection: 'row',
@@ -305,13 +430,31 @@ const styles = StyleSheet.create({
     fontSize: 48,
     minWidth: 100,
     textAlign: 'center',
-    paddingVertical: 4,
+    paddingVertical: 2,
+  },
+  presetsRow: {
+    flexDirection: 'row',
+    gap: 6,
+    marginTop: 10,
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+  },
+  presetChip: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderWidth: 1,
   },
   inputGroup: {
-    marginTop: 18,
+    marginTop: 16,
+  },
+  labelRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
   },
   inputLabel: {
-    marginBottom: 8,
+    marginBottom: 0,
   },
   textInput: {
     paddingHorizontal: 14,
@@ -340,6 +483,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   saveButton: {
-    marginTop: 24,
+    marginTop: 22,
   },
 });
