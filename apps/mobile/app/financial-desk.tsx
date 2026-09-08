@@ -45,7 +45,7 @@ export default function FinancialDeskScreen() {
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerTop}>
-            <LedgerLabel style={styles.headerLabel}>FINTRACK INTELLIGENCE</LedgerLabel>
+            <LedgerLabel style={styles.headerLabel}>OIKOS INTELLIGENCE</LedgerLabel>
             <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
               <Text variant="caption" color={colors.inkMuted}>
                 CLOSE

@@ -156,7 +156,7 @@ export interface Settings {
 }
 
 export interface BackupData {
-  format: 'fintrack-backup';
+  format: 'oikos-backup' | 'fintrack-backup';
   version: number;
   createdAt: string;
   appVersion: string;

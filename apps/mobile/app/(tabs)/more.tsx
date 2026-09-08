@@ -33,7 +33,7 @@ export default function MoreScreen() {
       setIsSharingCsv(true);
       const csv = exportCsvString();
       const dateStr = new Date().toISOString().split('T')[0];
-      await shareCsvFile(`fintrack_ledger_${dateStr}`, csv);
+      await shareCsvFile(`oikos_ledger_${dateStr}`, csv);
       setCsvStatusMessage(`Exported ${transactions.length} rows to CSV share sheet.`);
       setTimeout(() => setCsvStatusMessage(null), 4000);
     } catch (e: any) {
@@ -94,7 +94,7 @@ export default function MoreScreen() {
               </Text>
               <Text variant="caption" color={colors.inkMuted} style={{ marginTop: 2 }}>
                 {isBiometricsSupported
-                  ? `Prompt ${biometricTypeName} when opening or switching to FinTrack Pro.`
+                  ? `Prompt ${biometricTypeName} when opening or switching to Oikos.`
                   : 'Hardware biometrics not supported or not enrolled on this device.'}
               </Text>
             </View>
@@ -234,7 +234,7 @@ export default function MoreScreen() {
         {/* Version info */}
         <View style={styles.footer}>
           <Text variant="caption" color={colors.inkSubtle}>
-            FinTrack Pro Mobile v1.0.0 · Zero-Backend Local SQLite · Native Privacy
+            Oikos v1.0.0 · Zero-Backend Local SQLite · Native Privacy
           </Text>
         </View>
       </ScrollView>

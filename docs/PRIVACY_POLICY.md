@@ -1,9 +1,9 @@
-# Privacy Policy for FinTrack Pro
+# Privacy Policy for Oikos
 
-**Effective Date:** August 16, 2026  
-**Last Updated:** August 16, 2026  
+**Effective Date:** September 7, 2026  
+**Last Updated:** September 7, 2026  
 
-FinTrack Pro ("we", "our", or "the App") is developed with a strict **Privacy-First, Zero-Cloud Data Collection** architecture. We believe that your personal financial records belong entirely to you, on your device, under your control.
+Oikos ("we", "our", or "the App") is developed with a strict **Privacy-First, Zero-Cloud Data Collection** architecture. We believe that your personal financial records belong entirely to you, on your device, under your control.
 
 ---
 
@@ -16,19 +16,20 @@ FinTrack Pro ("we", "our", or "the App") is developed with a strict **Privacy-Fi
 
 ## 2. On-Device Local Processing
 * **Financial Calculations & Heuristics:** All balance aggregation, budget threshold monitoring, net worth calculations, and Financial Desk AI analyst queries run 100% locally on your device's CPU.
-* **Statement Intake (CSV/PDF):** File parsing and text normalization occur locally within the application sandbox. No financial documents or statement contents are ever uploaded to any external server.
+* **Statement Intake (CSV):** File parsing and text normalization occur locally within the application sandbox. No financial documents or statement contents are ever uploaded to any external server.
+* **Biometric Authentication:** Face ID and Fingerprint credentials are handled exclusively by your device operating system's secure enclave and never accessed or stored by Oikos.
 
 ---
 
 ## 3. Data Backup and Portability
 * The App provides an explicit **Export Backup (JSON / CSV)** feature.
-* Any backup files or CSV exports you generate are created locally on your device. You have 100% ownership over where you transfer or store these files.
+* Any backup files or CSV exports you generate are created locally on your device and shared via your system's native share sheet. You have 100% ownership over where you transfer or store these files.
 
 ---
 
 ## 4. Third-Party Services & Permissions
 * The App does not contain third-party advertising networks, analytics trackers (such as Google Analytics or Facebook SDK), or marketing beacons.
-* The App only requests standard device permissions necessary for local operation (such as local file storage access when you explicitly choose to export or import a file).
+* The App only requests standard device permissions necessary for local operation (such as local file storage access when you explicitly choose to export or import a file, and local authentication if you choose to enable biometric lock).
 
 ---
 
@@ -38,6 +39,6 @@ FinTrack Pro ("we", "our", or "the App") is developed with a strict **Privacy-Fi
 ---
 
 ## 6. Contact Us
-If you have any questions regarding this Privacy Policy or the security of FinTrack Pro, you may reach out to:  
-* **Developer Email:** `support@fintrackpro.app`  
+If you have any questions regarding this Privacy Policy or the security of Oikos, you may reach out to:  
+* **Developer Email:** `support@oikosledger.app`  
 * **GitHub Repository:** `https://github.com/MasterZ1311/FinTrack-Pro`

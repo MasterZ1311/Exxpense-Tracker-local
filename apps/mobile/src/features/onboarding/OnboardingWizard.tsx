@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, TextInput, ScrollView } from 'react-native';
+import { View, StyleSheet, TextInput, ScrollView, Image } from 'react-native';
 import { useTheme } from '../../theme/ThemeContext';
 import { Text, LedgerLabel, EditorialHeadline } from '../../components/Typography';
 import { Button } from '../../components/Button';
@@ -71,7 +71,12 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
       {step === 'manifesto' ? (
         <View style={styles.manifestoContainer}>
           <View style={styles.manifestoHeader}>
-            <LedgerLabel style={styles.brandSubtitle}>FINTRACK PRO</LedgerLabel>
+            <Image
+              source={require('../../../assets/logo.png')}
+              style={styles.manifestoLogo}
+              resizeMode="contain"
+            />
+            <LedgerLabel style={styles.brandSubtitle}>OIKOS</LedgerLabel>
             <EditorialHeadline size={36} style={styles.manifestoHeadline}>
               YOUR MONEY.{'\n'}YOUR DEVICE.{'\n'}YOUR RULES.
             </EditorialHeadline>
@@ -214,6 +219,11 @@ const styles = StyleSheet.create({
   },
   manifestoHeader: {
     marginBottom: 28,
+  },
+  manifestoLogo: {
+    width: 96,
+    height: 86,
+    marginBottom: 20,
   },
   brandSubtitle: {
     marginBottom: 12,

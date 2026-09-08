@@ -18,7 +18,7 @@ export async function shareCsvFile(filename: string, csvContent: string): Promis
     if (isAvailable) {
       await Sharing.shareAsync(filePath, {
         mimeType: 'text/csv',
-        dialogTitle: 'Export FinTrack Pro Ledger',
+        dialogTitle: 'Export Oikos Ledger',
         UTI: 'public.comma-separated-values-text',
       });
       return true;
@@ -46,7 +46,7 @@ export async function shareJsonBackupFile(filename: string, jsonContent: string)
     if (isAvailable) {
       await Sharing.shareAsync(filePath, {
         mimeType: 'application/json',
-        dialogTitle: 'Export FinTrack Pro Backup',
+        dialogTitle: 'Export Oikos Backup',
         UTI: 'public.json',
       });
       return true;

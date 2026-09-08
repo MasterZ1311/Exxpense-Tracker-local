@@ -3,7 +3,7 @@ import { AppState, AppStateStatus, Platform } from 'react-native';
 import * as LocalAuthentication from 'expo-local-authentication';
 import * as SecureStore from 'expo-secure-store';
 
-const BIOMETRICS_KEY = 'fintrack_biometrics_enabled';
+const BIOMETRICS_KEY = 'oikos_biometrics_enabled';
 
 interface SecurityContextValue {
   isBiometricsSupported: boolean;
@@ -70,7 +70,7 @@ export const SecurityProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       }
 
       const result = await LocalAuthentication.authenticateAsync({
-        promptMessage: 'Unlock FinTrack Pro',
+        promptMessage: 'Unlock Oikos Ledger',
         fallbackLabel: 'Enter Device Passcode',
         disableDeviceFallback: false,
         cancelLabel: 'Cancel',

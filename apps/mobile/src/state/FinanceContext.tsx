@@ -263,7 +263,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const exportBackupJson = (): string => {
     if (!profile) throw new Error('No profile to export');
     const backup: BackupData = {
-      format: 'fintrack-backup',
+      format: 'oikos-backup',
       version: 1,
       createdAt: new Date().toISOString(),
       appVersion: '1.0.0',
@@ -313,8 +313,8 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const importBackupJson = async (jsonString: string): Promise<void> => {
     const data: BackupData = JSON.parse(jsonString);
-    if (data.format !== 'fintrack-backup') {
-      throw new Error('Invalid backup format');
+    if (data.format !== 'oikos-backup' && data.format !== 'fintrack-backup') {
+      throw new Error('Invalid backup format: missing Oikos/FinTrack header');
     }
 
     const db = await getDatabase();

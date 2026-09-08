@@ -43,7 +43,7 @@ export default function BackupScreen() {
       const json = exportedJson || exportBackupJson();
       setExportedJson(json);
       const dateStr = new Date().toISOString().split('T')[0];
-      await shareJsonBackupFile(`fintrack_backup_${dateStr}`, json);
+      await shareJsonBackupFile(`oikos_backup_${dateStr}`, json);
       setStatusMessage('Backup shared to device.');
     } catch (e: any) {
       setStatusMessage(e.message || 'Share failed.');

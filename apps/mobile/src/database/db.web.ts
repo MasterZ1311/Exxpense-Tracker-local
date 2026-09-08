@@ -20,7 +20,7 @@ function saveToLocalStorage() {
             }
           }
         }
-        window.localStorage.setItem('fintrack_pro_alasql', JSON.stringify(data));
+        window.localStorage.setItem('oikos_alasql', JSON.stringify(data));
       }
     }
   } catch (e) {
@@ -31,7 +31,7 @@ function saveToLocalStorage() {
 function loadFromLocalStorage() {
   try {
     if (typeof window !== 'undefined' && window.localStorage) {
-      const json = window.localStorage.getItem('fintrack_pro_alasql');
+      const json = window.localStorage.getItem('oikos_alasql');
       if (json) {
         const data = JSON.parse(json) as Record<string, any[]>;
         for (const [tableName, rows] of Object.entries(data)) {

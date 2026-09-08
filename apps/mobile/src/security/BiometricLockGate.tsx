@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { useSecurity } from './SecurityContext';
 import { useTheme } from '../theme/ThemeContext';
 import { Text, LedgerLabel, EditorialHeadline } from '../components/Typography';
@@ -17,17 +17,19 @@ export const BiometricLockGate: React.FC<{ children: React.ReactNode }> = ({ chi
   return (
     <View style={[styles.container, { backgroundColor: colors.paper }]}>
       <View style={styles.centerContent}>
-        <View style={[styles.lockIconBox, { backgroundColor: colors.ink }]}>
-          <Lock size={32} color={colors.paper} />
-        </View>
+        <Image
+          source={require('../../assets/logo.png')}
+          style={styles.logoEmblem}
+          resizeMode="contain"
+        />
 
-        <LedgerLabel style={styles.label}>FINANCIAL LEDGER LOCKED</LedgerLabel>
+        <LedgerLabel style={styles.label}>OIKOS LEDGER LOCKED</LedgerLabel>
         <EditorialHeadline size={28} style={styles.headline}>
-          FinTrack Pro
+          Oikos
         </EditorialHeadline>
         
         <Text variant="secondary" size={14} style={styles.subtitle}>
-          Authenticate with {biometricTypeName} or device passcode to unlock your ledger.
+          Authenticate with {biometricTypeName} to unlock your personal ledger.
         </Text>
 
         <Button
@@ -53,6 +55,11 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 380,
     alignItems: 'center',
+  },
+  logoEmblem: {
+    width: 88,
+    height: 80,
+    marginBottom: 20,
   },
   lockIconBox: {
     width: 68,

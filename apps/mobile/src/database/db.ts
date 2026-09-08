@@ -9,7 +9,7 @@ export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
     return dbInstance;
   }
 
-  const db = await SQLite.openDatabaseAsync('fintrack_pro.db');
+  const db = await SQLite.openDatabaseAsync('oikos.db');
   dbInstance = db;
   return db;
 }

@@ -330,7 +330,7 @@ describe('FULL-STACK PRODUCT QA VALIDATION SUITE', () => {
     it('validates versioned backup JSON format structure and compatibility', () => {
       const profile: Profile = { id: 'p1', name: 'MasterZ', currency: 'INR', isOnboarded: true, createdAt: '', updatedAt: '' };
       const backup: BackupData = {
-        format: 'fintrack-backup',
+        format: 'oikos-backup',
         version: 1,
         createdAt: new Date().toISOString(),
         appVersion: '1.0.0',
@@ -346,16 +346,16 @@ describe('FULL-STACK PRODUCT QA VALIDATION SUITE', () => {
 
       const jsonStr = JSON.stringify(backup);
       const parsed = JSON.parse(jsonStr) as BackupData;
-      assert.strictEqual(parsed.format, 'fintrack-backup');
+      assert.strictEqual(parsed.format, 'oikos-backup');
       assert.strictEqual(parsed.version, 1);
       assert.strictEqual(parsed.profile.name, 'MasterZ');
     });
 
-    it('rejects corrupted or non-fintrack backup JSON formats gracefully', () => {
+    it('rejects corrupted or non-oikos backup JSON formats gracefully', () => {
       const invalidJson = JSON.stringify({ someOtherApp: true, format: 'unknown' });
       assert.throws(() => {
         const data = JSON.parse(invalidJson);
-        if (data.format !== 'fintrack-backup') throw new Error('Invalid backup format');
+        if (data.format !== 'oikos-backup' && data.format !== 'fintrack-backup') throw new Error('Invalid backup format');
       }, /Invalid backup format/);
     });
   });

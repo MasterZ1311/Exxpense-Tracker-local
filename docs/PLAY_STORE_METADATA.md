@@ -1,14 +1,14 @@
-# Google Play Store Listing & Metadata Package
+# Google Play Store Listing & Metadata Package — Oikos
 
 ---
 
 ## 1. Store Listing Details
 
 * **App Title (max 30 chars):**  
-  `FinTrack Pro: Expense Tracker`
+  `Oikos: Personal Expense Ledger`
 
 * **Short Description (max 80 chars):**  
-  `Private, offline personal finance tracker with editorial ledger & AI analyst.`
+  `Private, offline financial ledger with editorial cash flow & on-device analyst.`
 
 * **Category:**  
   `Finance / Personal Finance`
@@ -23,19 +23,22 @@
 ```text
 YOUR MONEY. YOUR DEVICE. YOUR RULES.
 
-FinTrack Pro is a personal financial instrument designed for intentional budgeters, privacy advocates, and mindful investors. 
+Named after the ancient Greek root of economics, Oikos is a personal financial instrument designed for intentional budgeters, privacy advocates, and mindful investors. 
 
-Unlike traditional finance apps that demand access to your bank passwords, bombard you with predatory loan ads, or lock your data behind monthly subscriptions, FinTrack Pro runs 100% offline with zero cloud tracking.
+Unlike traditional finance apps that demand access to your bank passwords, bombard you with predatory loan ads, or lock your records behind monthly subscriptions, Oikos runs 100% offline with zero cloud tracking.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 KEY CAPABILITIES
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 ◆ EDITORIAL MONEY FLOW & BALANCE
-Experience your finances through a calm, tactile ledger interface. See your total liquid balance, monthly income flow, expense distribution, and 20-segment Financial Pulse rhythm track at a single glance.
+Experience your finances through a calm, tactile paper-and-ink ledger interface. See your total liquid balance, monthly income flow, expense distribution, and 20-segment Financial Pulse rhythm track at a single glance.
 
-◆ RAPID LEDGER LOGGING
-Log expenses in under 4 seconds. Tap any past entry to edit amounts, change accounts, or delete with atomic balance recalculation. Filter and search effortlessly by merchant, category, or transaction type.
+◆ 2-TAP RAPID LEDGER LOGGING
+Log expenses in 2 taps with smart preset increment chips (+₹100, +₹500, +₹1k, +₹2k). Smart keyword auto-categorization detects merchants (Swiggy, Uber, Chai, Groceries, Rent) as you type.
+
+◆ BIOMETRIC PRIVACY SHIELD
+Hardware-level Face ID and Fingerprint app-lock guarantees that your financial ledger is completely private to you, even when your phone is unlocked.
 
 ◆ PLANNING & DEBT-FREE JOURNEYS
 • Budget Tracks: Real-time spend vs limit monitoring with proactive threshold alerts.
@@ -55,6 +58,7 @@ Ask direct questions about your financial health:
 Runs 100% locally on your phone's processor with zero data sent to external AI servers.
 
 ◆ TRUE DATA OWNERSHIP & STATEMENT INTAKE
+• Native File Picker & Share Sheet: AirDrop, WhatsApp, Google Drive, and Files integration.
 • Import statement CSV records with automated categorization.
 • 1-tap Export to standard CSV for spreadsheet analysis.
 • Versioned JSON backup & restore engine.
